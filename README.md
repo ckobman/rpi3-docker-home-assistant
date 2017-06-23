@@ -24,7 +24,7 @@
 
 This is a container intended to run on RPI3 hosting the home-assistant project for home automation. This tries to be as close to the official images and includes the RPI-GPIO as well as all modules found in the regular x86_64 image for home-assistant.
 
-Unfortunately, Docker Hub is unable to automatically build ARM images, so this is not an automated build. See the build instructions below, as well as clone this repository from [github](https://hub.docker.com/r/mitchese/rpi3-docker-home-assistant/)
+Unfortunately, Docker Hub is unable to automatically build ARM images, so this is not an automated build. See the build instructions below, as well as clone this repository from [github](https://github.com/mitchese/rpi3-docker-home-assistant)
 
 ## Issues
 
