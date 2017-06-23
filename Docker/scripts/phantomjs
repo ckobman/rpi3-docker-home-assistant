@@ -1,0 +1,14 @@
+#!/bin/bash
+# Sets up phantomjs.
+
+# Stop on errors
+set -e
+
+PHANTOMJS_VERSION="2.1.1"
+
+#cd "$(dirname "$0")/.."
+#mkdir -p build && cd build
+
+curl -o /usr/local/bin/phantomjs -sSL https://github.com/fg2it/phantomjs-on-raspberry/releases/download/v2.1.1-wheezy-jessie-armv6/phantomjs
+chmod a+x /usr/local/bin/phantomjs
+/usr/local/bin/phantomjs -v
