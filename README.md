@@ -1,7 +1,3 @@
-
-[![Docker Repository on Quay.io](https://quay.io/repository/mitchese/rpi3-docker-home-assistant/status "Docker Repository on Quay.io")](https://quay.io/repository/mitchese/rpi3-docker-home-assistant)
-
-
 # mitchese/rpi3-docker-home-assistant:0.47.1
 
 - [Introduction](#introduction)
