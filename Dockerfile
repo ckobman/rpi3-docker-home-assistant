@@ -41,7 +41,7 @@ RUN /usr/local/bin/pip3.6 install -r requirements_all.txt
 
 RUN /usr/local/bin/pip3.6 install mysqlclient psycopg2 uvloop cchardet
 
-RUN /usr/local/bin/pip3.6 install homeassistant==0.46.1
+RUN /usr/local/bin/pip3.6 install homeassistant==0.47.1
 # Copy source
 #COPY . .
 
