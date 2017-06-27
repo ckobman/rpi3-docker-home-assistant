@@ -2,120 +2,91 @@
 [![Docker Repository on Quay.io](https://quay.io/repository/mitchese/rpi3-docker-home-assistant/status "Docker Repository on Quay.io")](https://quay.io/repository/mitchese/rpi3-docker-home-assistant)
 
 
-# mitchese/rpi3-docker-home-assistant:0.46.1
+# mitchese/rpi3-docker-home-assistant:0.47.1
 
 - [Introduction](#introduction)
-  - [Contributing](#contributing)
-  - [Issues](#issues)
-  - [Changelog](Changelog.md)
-- [Getting started](#getting-started)
-  - [Installation](#installation)
-  - [Quickstart](#quickstart)
-  - [Command-line arguments](#command-line-arguments)
-  - [Persistence](#persistence)
-  - [Deploy Keys](#deploy-keys)
-  - [Trusting SSL Server Certificates](#trusting-ssl-server-certificates)
-- [Maintenance](#maintenance)
-  - [Upgrading](#upgrading)
-  - [Shell Access](#shell-access)
-- [List of runners using this image](#list-of-runners-using-this-image)
+  - [Installing Docker](#docker-on-your-Raspberry)
+  - [Running this image](#Running-the-Image)
+  - [Persistent Storage](#Persistent-Storage)
+  - [Troubleshooting](#Troubleshooting)
+  - [Building the image yourself](#Building-the-image-yourself)
+- [Upgrades](#upgrades)
 
 # Introduction
 
-This is a container intended to run on RPI3 hosting the home-assistant project for home automation. This tries to be as close to the official images and includes the RPI-GPIO as well as all modules found in the regular x86_64 image for home-assistant.
+This is a container intended to run on RPI3 hosting the home-assistant project for home automation. This tries to be as close as possible to the official images and includes the RPI-GPIO as well as all modules found in the regular x86_64 image for home-assistant.
 
-Unfortunately, Docker Hub is unable to automatically build ARM images, so this is not an automated build. See the build instructions below, as well as clone this repository from [github](https://github.com/mitchese/rpi3-docker-home-assistant)
+Unfortunately, Docker Hub is unable to automatically build ARM images, so this is not an automated build. See the build instructions below, as well as clone this repository from [github](https://github.com/mitchese/rpi3-docker-home-assistant/)
 
-## Issues
+The instructions below are split into two sections, one to get Docker running on a Raspberry Pi, and the second to get this image running on the Raspberry Pi with Docker.
 
-Before reporting your issue please try updating Docker to the latest version and check if it resolves the issue. Refer to the Docker [installation guide](https://docs.docker.com/installation) for instructions.
+## Docker on your Raspberry
 
-SELinux users should try disabling SELinux using the command `setenforce 0` to see if it resolves the issue.
+Docker is an amazing virutalization/containerization solution, which allows rapid development and deployment. You can use Docker to run other tools such as Node-Red along side home-assistant. This how-to is a compressed form of the full instructions from the Hypriot blog, which can be found [here](https://blog.hypriot.com/getting-started-with-docker-on-your-arm-device/) for Windows, OSX and Linux. 
 
-If the above recommendations do not help then [report your issue](../../issues/new) along with the following information:
+You will need 
+  - an SD Card at least 4Gb, but 8Gb or larger is recommended
+  - A copy of Win32 Disk Imager, found [here](https://sourceforge.net/projects/win32diskimager/)
+  - A copy of the latest Hypriot OS, which can be found [here](https://blog.hypriot.com/downloads/) (download the latest one, like hypriotos-rpi-v1.4.0.img.zip) 
+  - If you're a debian user, you can also download a .deb package from the download page
 
-- Output of the `docker version` and `docker info` commands
-- The `docker run` command or `docker-compose.yml` used to start the image. Mask out the sensitive bits.
-- Please state if you are using [Boot2Docker](http://www.boot2docker.io), [VirtualBox](https://www.virtualbox.org), etc.
+Download and extract the Hypriot OS image from the link above. 
 
-# Getting started
+Start Win32 Disk Imager, and choose the .img file you extracted above as the source image. In the device, locate your SD Card. **Ensure the SD Card is chosen as your target device. Getting this wrong may accidentally install Hypriot overtop of Windows!** 
 
-## Installation
+That's it! Once the Win32 Disk imager is compete, you can safely remove the SD card from Windows and you're done. Insert it into your Raspberry Pi, connect the power and it should boot. You can login with the username **pirate** and password **hypriot**, either with a keyboard/monitor attached to the Raspberry Pi, or via the Putty SSH Client - (download [here](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html))
 
-A finished image of this is available on [Dockerhub](https://hub.docker.com/r/mitchese/rpi3-docker-home-assistant) and is the recommended method of installation.
+## Running the Image
 
-```bash
-docker pull mitchese/rpi3-docker-home-assistant:latest
+Type this in the command line 
+
+```
+docker run -d -p 8123:8123 --name="home-assistant" mitchese/rpi3-docker-home-assistant:latest
 ```
 
-Alternatively you can build the image yourself.
+which should give some output like this (where ```6bd...``` is the container ID): 
+```
+[rancher@rancher ~]$ docker run -d -p 8123:8123 --name="home-assistant" mitchese/rpi3-docker-home-assistant:latest
+6db05eeee486aa56f4e5dbe81da6866692986d47eccdc94a2213b5fe8f364c29
+[rancher@rancher ~]$
+```
+
+You should now (after ~30 seconds of waiting) be able to connect to http://<your_pi_ip>:8123/ and see the initial "Welcome Home" card. 
+
+### Persistent Storage
+
+Docker containers are not meant to have any permanent data inside the container itself. Any upgrades or changes in the container will lose your entire configuration, since a clean container is always created. You can resolve this by mounting the config directory outside of your container.  Use the ```-v``` option below to accomplish this. If you're planning on using any presence detection or HUE Bridge emulation, you will also need to replace ```-p 8123:8123``` with ```--net=host``` as shown below  
+
+```
+mkdir -p /var/docker-data/homeassistant
+docker run -d -v /var/docker-data/homeassistant:/config --net=host --name="home-assistant" mitchese/rpi3-docker-home-assistant:latest
+```
+
+This will mount ```/var/docker-data/homeassistant``` on the parent machine (hypriot or raspbian) to the "/config" location inside the container. The parent machine folder can be any folder; however, it must be mounted under ```/config``` in the container.  This way, any new versions can mount this same directory and preserve the configuration and SQLite DB. 
+
+
+### Troubleshooting
+
+If anything goes wrong, you can use the following commands to help diagnose the issue. Please open an issue on Github if something isn't working as described. Note that the container ID can be shortened, so instead of typing ```6db05eeee486aa56f4e5dbe81da6866692986d47eccdc94a2213b5fe8f364c29``` you can type just ```6bd``` (your container ID will be different)
+
+  - ```docker logs <container ID>``` will show the output from Home Assistant 
+  - ```docker ps -a``` will show all containers and their current state (running, stopped)
+  - ```docker images``` will show all container images 
+  - ```docker exec -ti <container ID> bash``` will create an interactive bash shell inside the container
+  - ```docker run -d -p 8123:8123 mitchese/rpi3-docker-home-assistant:0.46``` will run a specific version of Home-Assistant (0.46) 
+
+This image is configured to use /config as the configuration location. You probably want to mount this 
+
+### Building the image yourself
+
+This is not necessary, but if you're interested in building the image yourself then you'll need a raspberry pi with both Docker and git installed. Run the following command: 
 
 ```bash
 docker build -t mitchese/rpi3-docker-home-assistant:latest github.com/mitchese/rpi3-docker-home-assistant
 ```
 
-## Quickstart
 
-You will need to develop your own configuration.yaml according to your home. You can clone my configuration as a starting point from my home-assistant configuration repository.
-
-```bash
-docker run -d --name="home-assistant" \
-  --volume /your-config-path:/config \
-  --volume /etc/localtime:/etc/localtime:ro \
-  --net=host mitchese/rpi3-docker-home-assistant
-```
-
-If you don't require host networking (for example, if you're not doing any traffic sniffing for presence detection, HUE Bridge emulation, etc.) then you can skip `--net=host` and replace with `--port 5000:5000`
-
-```bash
-docker run -d --name="home-assistant" \
-  --volume /your-config-path:/config \
-  --volume /etc/localtime:/etc/localtime:ro \
-  --port 5000:5000 mitchese/rpi3-docker-home-assistant
-```
-
-## Persistence
-
-Everything in home-assistant is stored in the configuration folder; By default it will setup a SQLite database which is under home_assistant.db in this folder. 
-
-Therefore, the only volume which needs to outlive the container is the `your-config-path` foldewr.
-
-> *The [Quickstart](#quickstart) command already mounts a volume for persistence.*
-
-## Letsencrypt SSL Certificates
-
-If you want to provide access via https with valid certificates, you can use the letsencrypt certbot from quay to generate the certificate.
-
-You must first forward port 80 from your router to your docker container, in order to pass the certificate authenticaion checks. Then: 
-
-```bash
-sudo mkdir /your-config-path/certs /var/lib/letsencrypt
-sudo docker run -it --rm --port 80:80 --name certbot \
-                --volume "/your-config-path/certs:/etc/letsencrypt" \
-                --volume "/var/lib/letsencrypt:/var/lib/letsencrypt" \
-                quay.io/letsencrypt/letsencrypt:latest certonly \
-                --standalone --standalone-supported-challenges http-01 \
-                --email your@email.address -d hass-example.muzik.ca
-```
-
-To upgrade the certificate (Every 90 days): 
-```bash
-./certbot-auto renew --quiet --no-self-upgrade --standalone \
-                     --standalone-supported-challenges http-01
-```
-
-To use the generated certificates: 
-```
-http:
-  api_password: YOUR_SECRET_PASSWORD
-  ssl_certificate: /config/certs/live/hass-example.muzik.ca/fullchain.pem
-  ssl_key: /config/certs/live/hass-example.muzik.ca/privkey.pem
-```
-
-
-# Maintenance
-
-## Upgrading
+# Upgrades
 
 To upgrade to newer releases:
 
@@ -134,14 +105,13 @@ To upgrade to newer releases:
   3. Remove the stopped container
 
   ```bash
-  docker rm -v home-assistant
+  docker rm home-assistant
   ```
 
   4. Start the updated image
 
   ```bash
   docker run -d --name="home-assistant" \
-    --volume /your-config-path:/config \
-    --volume /etc/localtime:/etc/localtime:ro \
+    --volume /var/docker-data/homeassistant:/config \
     --net=host mitchese/rpi3-docker-home-assistant:latest
   ```
