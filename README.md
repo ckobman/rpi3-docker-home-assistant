@@ -5,11 +5,11 @@
 # mitchese/rpi3-docker-home-assistant:0.47.1
 
 - [Introduction](#introduction)
-  - [Installing Docker](#docker-on-your-Raspberry)
-  - [Running this image](#Running-the-Image)
-  - [Persistent Storage](#Persistent-Storage)
+  - [Installing Docker](#docker-on-your-daspberry)
+  - [Running this image](#running-the-image)
+  - [Persistent Storage](#persistent-storage)
   - [Troubleshooting](#Troubleshooting)
-  - [Building the image yourself](#Building-the-image-yourself)
+  - [Building the image yourself](#building-the-image-yourself)
 - [Upgrades](#upgrades)
 
 # Introduction
