@@ -1,4 +1,4 @@
-# mitchese/rpi3-docker-home-assistant:0.47.1
+# mitchese/rpi3-docker-home-assistant:0.48
 
 - [Introduction](#introduction)
   - [Installing Docker](#docker-on-your-raspberry)
